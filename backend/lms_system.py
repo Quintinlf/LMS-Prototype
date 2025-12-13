@@ -701,40 +701,48 @@ def render_student_dashboard(current_user, users, courses, assignments, submissi
                 
                 # Show submission form if not submitted
                 if not submission:
-                    submission_text = widgets.Textarea(
-                        placeholder=f'Enter your work for {assignment.title}...',
-                        layout=widgets.Layout(width='80%', height='80px')
-                    )
+                    submission_area = widgets.Output()
                     
-                    def submit_assignment(b, aid=assign_id, text_widget=submission_text):
-                        if text_widget.value.strip():
-                            new_submission = Submission(
-                                current_user.user_id,
-                                aid,
-                                text_widget.value,
-                                datetime.now()
-                            )
-                            submissions[(current_user.user_id, aid)] = new_submission
-                            
-                            with courses_output:
-                                clear_output()
-                                display(HTML(f"""
-                                <div style='background-color: #d1fae5; border: 2px solid #10b981;
-                                            border-radius: 8px; padding: 15px; margin: 10px 0;'>
-                                    <h4 style='color: #10b981;'>✅ Assignment Submitted!</h4>
-                                    <p>Your work has been submitted successfully. Your teacher will grade it soon.</p>
-                                </div>
-                                """))
-                                show_student_dashboard()
+                    with submission_area:
+                        submission_text = widgets.Textarea(
+                            placeholder=f'Enter your work for {assignment.title}...',
+                            layout=widgets.Layout(width='80%', height='80px')
+                        )
+                        
+                        def make_submit_callback(aid, text_widget, output_area):
+                            def submit_assignment(b):
+                                if text_widget.value.strip():
+                                    new_submission = Submission(
+                                        current_user.user_id,
+                                        aid,
+                                        text_widget.value,
+                                        datetime.now()
+                                    )
+                                    submissions[(current_user.user_id, aid)] = new_submission
+                                    
+                                    with output_area:
+                                        clear_output()
+                                        display(HTML(f"""
+                                        <div style='background-color: #d1fae5; border: 2px solid #10b981;
+                                                    border-radius: 8px; padding: 15px; margin: 10px 0;'>
+                                            <h4 style='color: #10b981;'>✅ Assignment Submitted!</h4>
+                                            <p>{assignment.title} submitted successfully! Your teacher will grade it soon.</p>
+                                            <p style='font-size: 0.9em; margin-top: 10px;'><em>Logout and login again to see updated status.</em></p>
+                                        </div>
+                                        """))
+                            return submit_assignment
+                        
+                        submit_btn = widgets.Button(
+                            description='✅ Submit Assignment',
+                            button_style='success',
+                            icon='check'
+                        )
+                        submit_btn.on_click(make_submit_callback(assign_id, submission_text, submission_area))
+                        
+                        display(submission_text)
+                        display(submit_btn)
                     
-                    submit_btn = widgets.Button(
-                        description='Submit Assignment',
-                        button_style='success',
-                        icon='check'
-                    )
-                    submit_btn.on_click(submit_assignment)
-                    
-                    display(widgets.VBox([submission_text, submit_btn]))
+                    display(submission_area)
                 
                 # Show feedback if graded
                 if submission and submission.grade is not None:
@@ -753,9 +761,12 @@ def render_student_dashboard(current_user, users, courses, assignments, submissi
         display(HTML("<h3>📈 My Progress</h3>"))
         
         # Get all graded submissions for this student
-        student_submissions = [(a, s) for (sid, aid), s in submissions.items() 
-                              if sid == current_user.user_id and s.grade is not None 
-                              for a in [assignments.get(aid)]]
+        student_submissions = []
+        for (sid, aid), s in submissions.items():
+            if sid == current_user.user_id and s.grade is not None:
+                assignment = assignments.get(aid)
+                if assignment:
+                    student_submissions.append((assignment, s))
         
         if student_submissions:
             scores = [sub.grade for _, sub in student_submissions]
