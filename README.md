@@ -6,7 +6,7 @@
 
 ## 📋 Project Overview
 
-This is a fully functional LMS prototype designed specifically for K-12 education, featuring advanced AI-powered capabilities to enhance both teaching and learning experiences. The system demonstrates intuitive design, robust functionality, and innovative use of artificial intelligence.
+This is a proof-of-concept LMS prototype designed specifically for K-12 education,featuring advanced AI-powered capabilities to enhance both teaching and learning experiences. The system demonstrates intuitive design, robust functionality, and innovative use of artificial intelligence.
 
 ## ✨ Key Features
 
