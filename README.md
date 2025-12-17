@@ -6,6 +6,8 @@
 
 ## 📋 Project Overview
 
+This prototype prioritizes system architecture, AI logic, and user workflows over full production wiring.
+
 This is a proof-of-concept LMS prototype designed specifically for K-12 education,featuring advanced AI-powered capabilities to enhance both teaching and learning experiences. The system demonstrates intuitive design, robust functionality, and innovative use of artificial intelligence.
 
 ## ✨ Key Features
